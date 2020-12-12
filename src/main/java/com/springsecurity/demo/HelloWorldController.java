@@ -29,7 +29,7 @@ EmpUserDetailsService empUserDetails;
 @Autowired
 JwtUtil jwtUtil;
 	
-@GetMapping("/")	
+@GetMapping("/hello")	
 public String HelloWorld() {
 	System.out.println("Inside get method");
 	return "HelloWorld";

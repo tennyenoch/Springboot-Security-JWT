@@ -8,15 +8,22 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@EnableWebSecurity
+import com.springsecurity.demo.filter.JWTFilter;
+
 @Configuration
+@EnableWebSecurity
 public class Securityconfigurer extends WebSecurityConfigurerAdapter{
 	
 	@Autowired
 	private EmpUserDetailsService userDetailsService;
+	
+	@Autowired
+	private JWTFilter jwtFilter;
 	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception
@@ -27,11 +34,16 @@ public class Securityconfigurer extends WebSecurityConfigurerAdapter{
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
+		System.out.println("Inside configure of Security Config");
 		http.csrf().disable()
 					.authorizeRequests()
 					.antMatchers("/authenticate").permitAll()
 					.anyRequest()
-					.authenticated();
+					.authenticated()
+					.and()
+					.sessionManagement()
+					.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 	
 	@Override
@@ -41,6 +53,7 @@ public class Securityconfigurer extends WebSecurityConfigurerAdapter{
 		return super.authenticationManagerBean();
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return NoOpPasswordEncoder.getInstance();
